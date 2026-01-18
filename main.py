@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
+from sklearn.ensemble import RandomForestClassifier
 
 df = pd.read_csv("heart.csv")
 # print(df.head())
@@ -79,4 +80,17 @@ lr = LogisticRegression(
 lr.fit(X_train_scaled,y_train)
 
 val_pred_lr = lr.predict(X_val_scaled)
-print("Logistic Regression\n",accuracy_score(y_val,val_pred_lr))
+# print("Logistic Regression\n",accuracy_score(y_val,val_pred_lr))
+
+#Random Forest Classifier
+rf = RandomForestClassifier(
+    n_estimators=300,
+    max_depth=8,
+    min_samples_split=5,
+    random_state=42
+)
+
+rf.fit(X_train_scaled,y_train)
+val_pred_rf = rf.predict(X_val_scaled)
+print("Logistic Regression\n",accuracy_score(y_val,val_pred_rf))
+
