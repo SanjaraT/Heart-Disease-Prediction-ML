@@ -8,6 +8,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import roc_curve, auc, roc_auc_score
 
 df = pd.read_csv("heart.csv")
 # print(df.head())
@@ -49,16 +50,19 @@ df['age_chol'] = df['age'] * df['chol']
 df['age_thalach'] = df['age'] * df['thalach']
 df['chol_thalach'] = df['chol'] * df['thalach']
 
+num_cols = [
+    'age', 'trestbps', 'chol', 'thalach', 'oldpeak',
+    'age_chol', 'age_thalach', 'chol_thalach'
+]
+
 #split
 X = df.drop(columns=['target'])
 y = df['target']
 
-X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.30, random_state=42)
-X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.50, random_state=42)
+X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.30, random_state=42, stratify=y)
+X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.50, random_state=42, stratify=y_temp)
 
 #Scaling
-num_cols = X_train.select_dtypes(include=['int64','float64']).columns
-
 scaler = StandardScaler()
 
 X_train_scaled = X_train.copy()
@@ -105,6 +109,36 @@ gb = GradientBoostingClassifier(
 
 gb.fit(X_train_scaled,y_train)
 val_pred_gb = gb.predict(X_val_scaled)
-print("Gradient Boosting\n",accuracy_score(y_val,val_pred_gb))
+# print("Gradient Boosting\n",accuracy_score(y_val,val_pred_gb))
 
+#ROC AUC
+def plot_roc (model, X_val, y_val, label):
+    y_prob = model.predict_proba(X_val)[:,1]
+    fpr, tpr,_ = roc_curve(y_val, y_prob)
+    roc_auc = auc(fpr,tpr)
+    plt.plot(fpr,tpr,label=f'{label}(AUC ={roc_auc:.3f})')
+    return roc_auc
+
+plt.figure(figsize=(7,6))
+auc_lr = plot_roc(lr, X_val_scaled, y_val, "Logistic Regression")
+auc_rf = plot_roc(rf, X_val_scaled, y_val, "Random Forest Classifier")
+auc_gb = plot_roc(gb, X_val_scaled, y_val, "Gradient Boosting Classifier")
+
+plt.plot([0,1],[0,1],'k--')
+plt.xlabel("False positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("ROC curve")
+plt.legend()
+plt.show()
+
+print("Validation Auc Scores")
+print("Logistic Regression :", auc_lr)
+print("Random Forest Classifier :", auc_rf)
+print("Gradient Boosting Classifier :", auc_gb)
+
+
+print("TEST ROC-AUC")
+print("Logistic Regression :", roc_auc_score(y_test, lr.predict_proba(X_test_scaled)[:,1]))
+print("Random Forest       :", roc_auc_score(y_test, rf.predict_proba(X_test_scaled)[:,1]))
+print("Gradient Boosting   :", roc_auc_score(y_test, gb.predict_proba(X_test_scaled)[:,1]))
 
