@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 df = pd.read_csv("heart.csv")
 # print(df.head())
@@ -31,4 +33,38 @@ corr_matrix = df.corr()
 plt.figure(figsize=(12,10))
 sns.heatmap(corr_matrix, annot=True, fmt = ".2f", cmap="coolwarm")
 plt.title("Correlation Matrix")
-plt.show()
+# plt.show()
+
+#Categorical Feature encoding
+cat_cols = ["sex","cp","fbs","restecg","exang","slope","ca","thal"]
+df = pd.get_dummies(df, columns=cat_cols, drop_first=True)
+# print(df.head())
+
+#Feature Marging
+df['age_chol'] = df['age'] * df['chol']
+df['age_thalach'] = df['age'] * df['thalach']
+df['chol_thalach'] = df['chol'] * df['thalach']
+
+#split
+X = df.drop(columns=['target'])
+y = df['target']
+
+X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.30, random_state=42)
+X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.50, random_state=42)
+
+#Scaling
+num_cols = X_train.select_dtypes(include=['int64','float64']).columns
+
+scaler = StandardScaler()
+
+X_train_scaled = X_train.copy()
+X_val_scaled   = X_val.copy()
+X_test_scaled  = X_test.copy()
+
+X_train_scaled[num_cols] = scaler.fit_transform(X_train[num_cols])
+X_val_scaled[num_cols]   = scaler.transform(X_val[num_cols])
+X_test_scaled[num_cols]  = scaler.transform(X_test[num_cols])
+
+df_scaled = pd.DataFrame(X_train_scaled)
+print(df_scaled.head())
+
