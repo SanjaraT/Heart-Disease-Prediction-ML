@@ -7,6 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 
 df = pd.read_csv("heart.csv")
 # print(df.head())
@@ -80,7 +81,7 @@ lr = LogisticRegression(
 lr.fit(X_train_scaled,y_train)
 
 val_pred_lr = lr.predict(X_val_scaled)
-# print("Logistic Regression\n",accuracy_score(y_val,val_pred_lr))
+# print("Random Forest\n",accuracy_score(y_val,val_pred_lr))
 
 #Random Forest Classifier
 rf = RandomForestClassifier(
@@ -92,5 +93,18 @@ rf = RandomForestClassifier(
 
 rf.fit(X_train_scaled,y_train)
 val_pred_rf = rf.predict(X_val_scaled)
-print("Logistic Regression\n",accuracy_score(y_val,val_pred_rf))
+# print("Logistic Regression\n",accuracy_score(y_val,val_pred_rf))
+
+#Gradient Boosting Classifier
+gb = GradientBoostingClassifier(
+    n_estimators=200,
+    max_depth=3,
+    learning_rate=0.05,
+    random_state=42
+)
+
+gb.fit(X_train_scaled,y_train)
+val_pred_gb = gb.predict(X_val_scaled)
+print("Gradient Boosting\n",accuracy_score(y_val,val_pred_gb))
+
 
