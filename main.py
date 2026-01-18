@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
 
 df = pd.read_csv("heart.csv")
 # print(df.head())
@@ -66,5 +68,15 @@ X_val_scaled[num_cols]   = scaler.transform(X_val[num_cols])
 X_test_scaled[num_cols]  = scaler.transform(X_test[num_cols])
 
 df_scaled = pd.DataFrame(X_train_scaled)
-print(df_scaled.head())
+# print(df_scaled.head())
 
+#Logistic Regression
+lr = LogisticRegression(
+    max_iter=1000,
+    C=1.0,
+    solver='liblinear'
+)
+lr.fit(X_train_scaled,y_train)
+
+val_pred_lr = lr.predict(X_val_scaled)
+print("Logistic Regression\n",accuracy_score(y_val,val_pred_lr))
