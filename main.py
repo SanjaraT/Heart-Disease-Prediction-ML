@@ -8,7 +8,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.metrics import roc_curve, auc, roc_auc_score
+from sklearn.metrics import roc_curve, auc, roc_auc_score, classification_report, confusion_matrix
 from sklearn.model_selection import GridSearchCV
 
 df = pd.read_csv("heart.csv")
@@ -167,7 +167,18 @@ grid_search = GridSearchCV(
 grid_search.fit(X_train_scaled,y_train)
 best_rf_tuned = grid_search.best_estimator_
 
-y_test_prob = best_rf_tuned.predict_proba(X_test_scaled)[:,1]
-test_auc = roc_auc_score(y_test,y_test_prob)
-print("Final Model AUC: ", test_auc)
+# y_test_prob = best_rf_tuned.predict_proba(X_test_scaled)[:,1]
+# test_auc = roc_auc_score(y_test,y_test_prob)
+# print("Final Model AUC: ", test_auc)
 
+#Final Model Evaluation
+y_test_pred = best_rf_tuned.predict(X_test_scaled)
+print("Classification Report Final Model\n", classification_report(y_test,y_test_pred))
+
+cm = confusion_matrix(y_test,y_test_pred)
+plt.figure(figsize=(5,4))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("Confusion Matrix")
+plt.show()
