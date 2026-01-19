@@ -9,6 +9,7 @@ from sklearn.metrics import accuracy_score, classification_report
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import roc_curve, auc, roc_auc_score
+from sklearn.model_selection import GridSearchCV
 
 df = pd.read_csv("heart.csv")
 # print(df.head())
@@ -129,16 +130,44 @@ plt.xlabel("False positive Rate")
 plt.ylabel("True Positive Rate")
 plt.title("ROC curve")
 plt.legend()
-plt.show()
+# plt.show()
 
-print("Validation Auc Scores")
-print("Logistic Regression :", auc_lr)
-print("Random Forest Classifier :", auc_rf)
-print("Gradient Boosting Classifier :", auc_gb)
+# print("Validation Auc Scores")
+# print("Logistic Regression :", auc_lr)
+# print("Random Forest Classifier :", auc_rf)
+# print("Gradient Boosting Classifier :", auc_gb)
 
 
-print("TEST ROC-AUC")
-print("Logistic Regression :", roc_auc_score(y_test, lr.predict_proba(X_test_scaled)[:,1]))
-print("Random Forest       :", roc_auc_score(y_test, rf.predict_proba(X_test_scaled)[:,1]))
-print("Gradient Boosting   :", roc_auc_score(y_test, gb.predict_proba(X_test_scaled)[:,1]))
+# print("TEST ROC-AUC")
+# print("Logistic Regression :", roc_auc_score(y_test, lr.predict_proba(X_test_scaled)[:,1]))
+# print("Random Forest       :", roc_auc_score(y_test, rf.predict_proba(X_test_scaled)[:,1]))
+# print("Gradient Boosting   :", roc_auc_score(y_test, gb.predict_proba(X_test_scaled)[:,1]))
+
+#Final model with tuning
+params = {
+    'n_estimators':[100,200,300],
+    'max_depth':[None, 10,20,30],
+    'min_samples_split':[2,5,10],
+    'min_samples_leaf':[1,2,4],
+    'max_features':['sqrt','log2'],
+}
+
+rf_tuned = RandomForestClassifier(
+    random_state=42,
+    class_weight='balanced'
+)
+grid_search = GridSearchCV(
+    estimator=rf_tuned,
+    param_grid=params,
+    scoring='roc_auc',
+    cv = 5,
+    n_jobs=-1,
+    verbose=1
+)
+grid_search.fit(X_train_scaled,y_train)
+best_rf_tuned = grid_search.best_estimator_
+
+y_test_prob = best_rf_tuned.predict_proba(X_test_scaled)[:,1]
+test_auc = roc_auc_score(y_test,y_test_prob)
+print("Final Model AUC: ", test_auc)
 
