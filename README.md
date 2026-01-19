@@ -5,19 +5,25 @@ This project predicts heart disease using machine learning. A complete pipeline 
 --> Dataset
 
 Kaggle Heart Disease Dataset
+
 Target: 0 (No disease), 1 (Disease)
 
 --> Methods
 
 One-hot encoding for categorical features
+
 Feature interaction engineering
+
 Train/Validation/Test split (70/15/15)
+
 StandardScaler for numerical features
 
 --> Models
 
 Logistic Regression
+
 Random Forest
+
 Gradient Boosting
 
 --> Evaluation Metric: ROC-AUC
@@ -27,4 +33,5 @@ Gradient Boosting
 --> Final Results (Test Set)
 
 Accuracy: 97%
+
 ROC-AUC: ≈ 0.98
